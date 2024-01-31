@@ -1,0 +1,32 @@
+pipeline{
+  agent any # where we execute on the node
+  
+  Stages{     # where work happens
+    stage("Dev"){
+           Steps{
+             echo 'we are building an Dev application'
+        }
+     }
+     stage("Test"){
+           Steps{
+             echo 'we are building an Test application'
+        }
+     }
+     stage("UAT"){
+           Steps{
+             echo 'we are building an UAT application'
+        }
+     }
+     stage("Stress"){
+           Steps{
+             echo 'we are building an Stress application'
+        }
+     }
+    stage("Prod"){
+           Steps{
+             echo 'we are building an Prod application'
+        }
+     }
+      
+    }
+  }
