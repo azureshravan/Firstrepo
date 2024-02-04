@@ -2,14 +2,14 @@ pipeline{
   agent any # where we execute on the node
   
   Stages{     # where work happens
-    stage("Dev"){
+    stage("Prod"){
            Steps{
-             echo 'we are building an Dev application'
+             echo 'we are building an Prod application'
         }
      }
-     stage("Test"){
+     stage("Pre-Prod"){
            Steps{
-             echo 'we are building an Test application'
+             echo 'we are building an Pro-Prod application'
         }
      }
      stage("UAT"){
@@ -17,14 +17,14 @@ pipeline{
              echo 'we are building an UAT application'
         }
      }
-     stage("Stress"){
+     stage("Test"){
            Steps{
-             echo 'we are building an Stress application'
+             echo 'we are building an Test application'
         }
      }
-    stage("Prod"){
+    stage("Dev"){
            Steps{
-             echo 'we are building an Prod application'
+             echo 'we are building an Dev application'
         }
      }
       
