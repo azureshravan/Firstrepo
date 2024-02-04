@@ -1,0 +1,343 @@
+@Library('container-ci@stable') _
+
+def deployableChartVersion = ''
+def targetEnvironment = 'dev'
+
+def runHelmPipelineForChart(targetEnvironment, deployableChartName) {
+  def pipelineParams
+  if(targetEnvironment.toLowerCase() == 'dev' ) {
+    pipelineParams = convertClosureToMap({
+
+      app = deployableChartName
+      ocp4 = false
+
+      devProject = "gcp-opt-ong-dev"
+      // The name of each cluster in GCP
+      devCluster = "ong-gke-pri-dev"
+
+      // The zone for each cluster listed above
+      devClusterRegion = "us-east4-a"
+
+      logLevel = "FINEST"
+      verboseStackTrace = true
+
+    })
+    // Fetch objects representing the clusters
+    // Returns a Map with keys:
+    //      build, dev, test, stress, prod1, prod2
+    def clusters = getGkeClusters(pipelineParams)
+
+    // Provide an array of Helm charts to apply (as defined in the charts folder)
+    pipelineParams.charts = [
+        [
+
+            // The name of the chart (matches the chart folder)
+            chart: deployableChartName,
+            // An array of namespaces to apply to
+            namespaces: [
+                // cluster            : the k8s cluster to apply the chart to
+                // namespace          : the namespace all the manifests will be applied in
+                // values (optional)  : file name(s) relative to values folder for overrides for this chart and/or literal values map.
+                // secrets (optional) : a configuration for injecting secrets from jenkins
+                [
+                  cluster: clusters.dev,
+                  namespace: "develop",
+                  values: ["values.dev.yaml"]
+                ]
+            ]
+        ]
+    ]
+
+  } else if(targetEnvironment.toLowerCase() == 'uat' ) {
+    pipelineParams = convertClosureToMap({
+      app = deployableChartName
+      ocp4 = false
+
+      testProject = "gcp-opt-ong-uat"
+      // The name of each cluster in GCP
+      stressCluster = "ong-gke-pri-sys"
+      testCluster = "ong-gke-pri-uat"
+
+      // The zone for each cluster listed above
+      testClusterZone = "us-east4"
+      stressClusterZone = "us-east4"
+
+      logLevel = "FINEST"
+      verboseStackTrace = true
+    })
+
+    // Provide an array of Helm charts to apply (as defined in the charts folder)
+    // Fetch objects representing the clusters
+    // Returns a Map with keys:
+    //      build, dev, test, stress, prod1, prod2
+    def clusters = getGkeClusters(pipelineParams)
+
+    pipelineParams.charts = [
+        [
+
+            // The name of the chart (matches the chart folder)
+            chart: deployableChartName,
+            // An array of namespaces to apply to
+            namespaces: [
+                // cluster            : the k8s cluster to apply the chart to
+                // namespace          : the namespace all the manifests will be applied in
+                // values (optional)  : file name(s) relative to values folder for overrides for this chart and/or literal values map.
+                // secrets (optional) : a configuration for injecting secrets from jenkins
+                [
+                  cluster: clusters.test,
+                  namespace: "uat",
+                  values: ["values.uat.yaml"]
+                ]
+            ]
+        ]
+    ]
+
+  } else if(targetEnvironment.toLowerCase() == 'snp1' ) {
+    pipelineParams = convertClosureToMap({
+      app = deployableChartName
+      ocp4 = false
+
+
+      // The name of each cluster in GCP
+      stressProject = "gcp-opt-ong-snp"
+      stressCluster = "ong-gke-pri-sys"
+
+      // The zone for each cluster listed above
+      stressClusterZone = "us-east4"
+
+      logLevel = "FINEST"
+      verboseStackTrace = true
+    })
+
+    // Fetch objects representing the clusters
+    // Returns a Map with keys:
+    //      build, dev, test, stress, prod1, prod2
+    def clusters = getGkeClusters(pipelineParams)
+    // Provide an array of Helm charts to apply (as defined in the charts folder)
+
+    pipelineParams.charts = [
+        [
+
+            // The name of the chart (matches the chart folder)
+            chart: deployableChartName,
+            // An array of namespaces to apply to
+            namespaces: [
+                // cluster            : the k8s cluster to apply the chart to
+                // namespace          : the namespace all the manifests will be applied in
+                // values (optional)  : file name(s) relative to values folder for overrides for this chart and/or literal values map.
+                // secrets (optional) : a configuration for injecting secrets from jenkins
+                [
+                  cluster: clusters.stress,
+                  namespace: "stress",
+                  values: ["values.snp.yaml"]
+                ]
+            ]
+        ]
+    ]
+
+  } else if(targetEnvironment.toLowerCase() == 'snp2' ) {
+    pipelineParams = convertClosureToMap({
+      app = deployableChartName
+      ocp4 = false
+
+
+      // The name of each cluster in GCP
+      stressProject = "gcp-opt-ong-snp"
+      stressCluster = "ong-gke-sec-sys"
+
+      // The zone for each cluster listed above
+      stressClusterZone = "us-central1"
+
+      logLevel = "FINEST"
+      verboseStackTrace = true
+    })
+
+    // Fetch objects representing the clusters
+    // Returns a Map with keys:
+    //      build, dev, test, stress, prod1, prod2
+    def clusters = getGkeClusters(pipelineParams)
+    // Provide an array of Helm charts to apply (as defined in the charts folder)
+
+    pipelineParams.charts = [
+        [
+
+            // The name of the chart (matches the chart folder)
+            chart: deployableChartName,
+            // An array of namespaces to apply to
+            namespaces: [
+                // cluster            : the k8s cluster to apply the chart to
+                // namespace          : the namespace all the manifests will be applied in
+                // values (optional)  : file name(s) relative to values folder for overrides for this chart and/or literal values map.
+                // secrets (optional) : a configuration for injecting secrets from jenkins
+                [
+                  cluster: clusters.stress,
+                  namespace: "stress",
+                  values: ["values.snp.yaml"]
+                ]
+            ]
+        ]
+    ]
+
+  } else if(targetEnvironment.toLowerCase() == 'int' ) {
+    pipelineParams = convertClosureToMap({
+      app = deployableChartName
+      ocp4 = false
+
+
+      // The name of each cluster in GCP
+      testProject = "gcp-opt-ong-int"
+      testCluster = "ong-gke-pri-int"
+
+      // The zone for each cluster listed above
+      testClusterZone = "us-east4-b"
+
+      logLevel = "FINEST"
+      verboseStackTrace = true
+    })
+
+    // Fetch objects representing the clusters
+    // Returns a Map with keys:
+    //      build, dev, test, stress, prod1, prod2
+    def clusters = getGkeClusters(pipelineParams)
+    // Provide an array of Helm charts to apply (as defined in the charts folder)
+
+    pipelineParams.charts = [
+        [
+
+            // The name of the chart (matches the chart folder)
+            chart: deployableChartName,
+            // An array of namespaces to apply to
+            namespaces: [
+                // cluster            : the k8s cluster to apply the chart to
+                // namespace          : the namespace all the manifests will be applied in
+                // values (optional)  : file name(s) relative to values folder for overrides for this chart and/or literal values map.
+                // secrets (optional) : a configuration for injecting secrets from jenkins
+                [
+                  cluster: clusters.test,
+                  namespace: "int",
+                  values: ["values.int.yaml"]
+                ]
+            ]
+        ]
+    ]
+
+  } else if(targetEnvironment.toLowerCase() == 'prod' ) {
+    pipelineParams = convertClosureToMap({
+
+      app = deployableChartName
+      ocp4 = false
+
+      prodProject = "gcp-opt-ong-prod"
+      // The name of each cluster in GCP
+      prodCluster1 = "ong-gke-pri-prod"
+      prodCluster2 = "ong-gke-sec-prod"
+
+      // The zone for each cluster listed above
+      prodCluster1Region = "us-east4"
+      prodCluster2Region = "us-central1"
+
+      logLevel = "FINEST"
+      verboseStackTrace = true
+    })
+    // Provide an array of Helm charts to apply (as defined in the charts folder)
+
+    // Fetch objects representing the clusters
+    // Returns a Map with keys:
+    //      build, dev, test, stress, prod1, prod2
+    def clusters = getGkeClusters(pipelineParams)
+
+    pipelineParams.charts = [
+        [
+
+            // The name of the chart (matches the chart folder)
+            chart: deployableChartName,
+            // An array of namespaces to apply to
+            namespaces: [
+                // cluster            : the k8s cluster to apply the chart to
+                // namespace          : the namespace all the manifests will be applied in
+                // values (optional)  : file name(s) relative to values folder for overrides for this chart and/or literal values map.
+                // secrets (optional) : a configuration for injecting secrets from jenkins
+                [
+                  cluster: clusters.prod1,
+                  namespace: "prod",
+                  values: ["values.prod.yaml"]
+                ]
+            ]
+        ]
+    ]
+	pipelineParams.charts = [
+        [
+
+            // The name of the chart (matches the chart folder)
+            chart: deployableChartName,
+            // An array of namespaces to apply to
+            namespaces: [
+                // cluster            : the k8s cluster to apply the chart to
+                // namespace          : the namespace all the manifests will be applied in
+                // values (optional)  : file name(s) relative to values folder for overrides for this chart and/or literal values map.
+                // secrets (optional) : a configuration for injecting secrets from jenkins
+                [
+                  cluster: clusters.prod2,
+                  namespace: "prod",
+                  values: ["values.prod.yaml"]
+                ]
+            ]
+        ]
+    ]
+
+  }
+
+
+  // Fetch objects representing the clusters
+  // Returns a Map with keys:
+  //      build, dev, test, stress, prod1, prod2
+  def clusters = getGkeClusters(pipelineParams)
+  runHelmPipeline(pipelineParams)
+  echo "Finished with runHelmPipeline"
+
+}
+
+node {
+  stage('Deploy to DEV') {
+      runHelmPipelineForChart('dev', 'common-service')
+      runHelmPipelineForChart('dev', 'package-domain-service')
+      runHelmPipelineForChart('dev', 'shipment-domain-service')
+      runHelmPipelineForChart('dev', 'locations-domain-service')
+      runHelmPipelineForChart('dev', 'movements-domain-service')
+  }
+  stage('Deploy to Int') {
+      runHelmPipelineForChart('int', 'common-service')
+      runHelmPipelineForChart('int', 'locations-domain-service')
+      runHelmPipelineForChart('int', 'shipment-domain-service')
+      runHelmPipelineForChart('int', 'package-domain-service')
+      runHelmPipelineForChart('int', 'movements-domain-service')
+  }
+  stage('Deploy to UAT/Test') {
+      runHelmPipelineForChart('uat', 'common-service')
+      runHelmPipelineForChart('uat', 'package-domain-service')
+      runHelmPipelineForChart('uat', 'shipment-domain-service')
+      runHelmPipelineForChart('uat', 'locations-domain-service')
+      runHelmPipelineForChart('uat', 'movements-domain-service')
+  }
+  stage('Deploy to SNP/Stress') {
+      runHelmPipelineForChart('snp1', 'common-service')
+      runHelmPipelineForChart('snp2', 'common-service')
+      runHelmPipelineForChart('snp1', 'package-domain-service')
+      runHelmPipelineForChart('snp1', 'shipment-domain-service')
+      runHelmPipelineForChart('snp2', 'package-domain-service')
+      runHelmPipelineForChart('snp2', 'shipment-domain-service')
+      runHelmPipelineForChart('snp1', 'locations-domain-service')
+      runHelmPipelineForChart('snp2', 'locations-domain-service')
+      runHelmPipelineForChart('snp1', 'movements-domain-service')
+      runHelmPipelineForChart('snp2', 'movements-domain-service')
+  }
+
+  stage('Deploy to Production') {
+      runHelmPipelineForChart('prod', 'common-service')
+      runHelmPipelineForChart('prod', 'locations-domain-service')
+      runHelmPipelineForChart('prod', 'shipment-domain-service')
+      runHelmPipelineForChart('prod', 'package-domain-service')
+      runHelmPipelineForChart('prod', 'movements-domain-service')
+  }
+
+}
