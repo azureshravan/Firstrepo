@@ -7,3 +7,6 @@ public class HelloEarth
 		System.out.println("Hello Earth!");
 	}
 }
+
+
+Thisis the first class of git
